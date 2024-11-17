@@ -40,18 +40,18 @@ class OrdersTab:
         self.load_orders()
 
     def load_orders(self):
-        """Загружает данные о заказах из базы."""
+        """Загружает данные о заказах из базы с цветовым выделением по статусу."""
         conn = connect_db()
         cursor = conn.cursor()
         cursor.execute("""
             SELECT o.id, 
-                   o.order_date, 
-                   COALESCE(o.due_date, 'Дата не указана') AS due_date, 
-                   COALESCE(c.contact_person, 'Не выбрано') AS client, 
-                   COALESCE(p.name, 'Не выбрано') AS product, 
-                   COALESCE(o.quantity, 0) AS quantity, 
-                   COALESCE(s.status_name, 'Черновик') AS status,
-                   COALESCE(o.additional_info, 'Нет дополнительной информации') AS additional_info
+                o.order_date, 
+                COALESCE(o.due_date, 'Дата не указана') AS due_date, 
+                COALESCE(c.contact_person, 'Не выбрано') AS client, 
+                COALESCE(p.name, 'Не выбрано') AS product, 
+                COALESCE(o.quantity, 0) AS quantity, 
+                COALESCE(s.status_name, 'Черновик') AS status,
+                COALESCE(o.additional_info, 'Нет дополнительной информации') AS additional_info
             FROM orders o
             LEFT JOIN clients c ON o.client_id = c.id
             LEFT JOIN products p ON o.product_id = p.id
@@ -64,9 +64,27 @@ class OrdersTab:
         for item in self.tree.get_children():
             self.tree.delete(item)
 
+        # Настройка цветовых тегов
+        self.tree.tag_configure("draft", background="white")  # Черновик
+        self.tree.tag_configure("client_approved", background="orange")  # Согласован клиентом
+        self.tree.tag_configure("in_production", background="yellow")  # Принят в производство
+        self.tree.tag_configure("completed", background="green")  # Выполнен
+
         # Заполняем таблицу данными
         for row in rows:
-            self.tree.insert("", "end", values=row)
+            status = row[6]
+            if status == "Черновик":
+                tag = "draft"
+            elif status == "Согласован клиентом":
+                tag = "client_approved"
+            elif status == "Принят в производство":
+                tag = "in_production"
+            elif status == "Выполнен":
+                tag = "completed"
+            else:
+                tag = ""  # Для любых других статусов
+
+            self.tree.insert("", "end", values=row, tags=(tag,))
 
     def create_order(self):
         """Создаёт новый заказ с пустой формой."""
