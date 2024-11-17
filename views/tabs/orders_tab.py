@@ -1,6 +1,7 @@
 from tkinter import ttk, Toplevel, messagebox
 from tkinter import StringVar, IntVar
 from db import connect_db
+import datetime  # Для работы с датами
 
 class OrdersTab:
     def __init__(self, parent):
@@ -163,16 +164,34 @@ class OrdersTab:
                 product_id = next((p[0] for p in products if p[1] == product_var.get()), None)
                 status_id = next((s[0] for s in statuses if s[1] == status_var.get()), 1)  # Черновик по умолчанию
                 quantity = quantity_var.get() if quantity_var.get() else None
-                due_date = due_date_var.get()  # Может быть пустым
+                due_date = due_date_var.get()
                 additional_info = additional_info_var.get()
 
-                # Проверка обязательных полей: клиент, продукт, количество
+                # Проверка обязательных полей
                 if not client_id or not product_id or not quantity or quantity <= 0:
                     messagebox.showwarning(
                         "Ошибка",
                         "Для сохранения заказа необходимо указать клиента, вид лесопродукции и положительное количество!"
                     )
                     return
+
+                # Проверка корректности даты выполнения
+                if due_date:
+                    try:
+                        today = datetime.date.today()
+                        due_date_parsed = datetime.datetime.strptime(due_date, "%Y-%m-%d").date()
+                        if due_date_parsed <= today:
+                            messagebox.showwarning(
+                                "Ошибка",
+                                "Дата выполнения заказа должна быть позже текущей даты!"
+                            )
+                            return
+                    except ValueError:
+                        messagebox.showwarning(
+                            "Ошибка",
+                            "Дата выполнения должна быть в формате ГГГГ-ММ-ДД!"
+                        )
+                        return
 
                 # Сохранение данных в базу
                 with connect_db() as conn:
