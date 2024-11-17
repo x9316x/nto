@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from views.commercial_window import CommercialServiceWindow  # Изменён импорт
+from views.commercial_window import CommercialServiceWindow
+from views.production_view import ProductionServiceWindow
+from views.tech_view import TechServiceWindow
 
 # Главное окно
 root = tk.Tk()
@@ -10,10 +12,10 @@ def open_commercial_service():
     CommercialServiceWindow(root)
 
 def open_production_service():
-    print("Открыто окно Службы производства")
+    ProductionServiceWindow(root)  # Полный функционал
 
 def open_tech_service():
-    print("Открыто окно Службы технолога")
+    TechServiceWindow(root)  # Полный функционал
 
 def main():
     # Настройка главного окна
