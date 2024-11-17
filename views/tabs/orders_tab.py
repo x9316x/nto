@@ -1,5 +1,5 @@
-from tkinter import ttk
-from tkinter import simpledialog, messagebox
+from tkinter import ttk, Toplevel, messagebox
+from tkinter import StringVar, IntVar
 from db import connect_db
 
 class OrdersTab:
@@ -13,7 +13,11 @@ class OrdersTab:
         ttk.Label(self.frame, text="Список заказов").pack(pady=10)
 
         # Таблица
-        self.tree = ttk.Treeview(self.frame, columns=("ID", "Order Date", "Due Date", "Client", "Product", "Quantity", "Status"), show="headings")
+        self.tree = ttk.Treeview(
+            self.frame,
+            columns=("ID", "Order Date", "Due Date", "Client", "Product", "Quantity", "Status"),
+            show="headings"
+        )
         self.tree.heading("ID", text="ID")
         self.tree.heading("Order Date", text="Дата регистрации")
         self.tree.heading("Due Date", text="Дата выполнения")
@@ -57,31 +61,73 @@ class OrdersTab:
             self.tree.insert("", "end", values=row)
 
     def create_order(self):
-        """Создаёт новый заказ."""
-        client_id = simpledialog.askinteger("Новый заказ", "Введите ID клиента:")
-        product_id = simpledialog.askinteger("Новый заказ", "Введите ID продукта:")
-        quantity = simpledialog.askinteger("Новый заказ", "Введите количество продукции:")
-        due_date = simpledialog.askstring("Новый заказ", "Введите дату выполнения (ГГГГ-ММ-ДД):")
+        """Создаёт новый заказ с выпадающими списками."""
+        form = Toplevel(self.frame)
+        form.title("Создать заказ")
+        form.geometry("400x300")
 
-        if not client_id or not product_id or not quantity or not due_date:
-            messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
-            return
+        client_var = StringVar()
+        product_var = StringVar()
+        quantity_var = IntVar()
+        due_date_var = StringVar()
+        status_var = StringVar()
 
+        # Получение данных из базы для выпадающих списков
         conn = connect_db()
         cursor = conn.cursor()
-        try:
-            cursor.execute("""
-                INSERT INTO orders (order_date, due_date, client_id, product_id, quantity, status_id)
-                VALUES (DATE('now'), ?, ?, ?, ?, 1)
-            """, (due_date, client_id, product_id, quantity))
-            conn.commit()
-            messagebox.showinfo("Успех", "Заказ успешно создан!")
-        except Exception as e:
-            messagebox.showerror("Ошибка", f"Не удалось создать заказ: {e}")
-        finally:
-            conn.close()
+        cursor.execute("SELECT id, contact_person FROM clients")
+        clients = cursor.fetchall()
+        cursor.execute("SELECT id, name FROM products")
+        products = cursor.fetchall()
+        cursor.execute("SELECT id, status_name FROM order_status")
+        statuses = cursor.fetchall()
+        conn.close()
 
-        self.load_orders()
+        ttk.Label(form, text="Клиент:").pack(pady=5)
+        client_combobox = ttk.Combobox(form, textvariable=client_var, values=[f"{c[0]}: {c[1]}" for c in clients])
+        client_combobox.pack(fill="x", padx=10)
+
+        ttk.Label(form, text="Продукт:").pack(pady=5)
+        product_combobox = ttk.Combobox(form, textvariable=product_var, values=[f"{p[0]}: {p[1]}" for p in products])
+        product_combobox.pack(fill="x", padx=10)
+
+        ttk.Label(form, text="Количество:").pack(pady=5)
+        ttk.Entry(form, textvariable=quantity_var).pack(fill="x", padx=10)
+
+        ttk.Label(form, text="Дата выполнения (ГГГГ-ММ-ДД):").pack(pady=5)
+        ttk.Entry(form, textvariable=due_date_var).pack(fill="x", padx=10)
+
+        ttk.Label(form, text="Статус:").pack(pady=5)
+        status_combobox = ttk.Combobox(form, textvariable=status_var, values=[f"{s[0]}: {s[1]}" for s in statuses])
+        status_combobox.pack(fill="x", padx=10)
+
+        def save_order():
+            try:
+                client_id = int(client_var.get().split(":")[0])
+                product_id = int(product_var.get().split(":")[0])
+                status_id = int(status_var.get().split(":")[0])
+                quantity = quantity_var.get()
+                due_date = due_date_var.get()
+
+                if not client_id or not product_id or not quantity or not due_date or not status_id:
+                    messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
+                    return
+
+                conn = connect_db()
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO orders (order_date, due_date, client_id, product_id, quantity, status_id)
+                    VALUES (DATE('now'), ?, ?, ?, ?, ?)
+                """, (due_date, client_id, product_id, quantity, status_id))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Успех", "Заказ успешно создан!")
+                self.load_orders()
+                form.destroy()
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Не удалось создать заказ: {e}")
+
+        ttk.Button(form, text="Сохранить", command=save_order).pack(pady=10)
 
     def delete_order(self):
         """Удаляет выбранный заказ."""
@@ -108,20 +154,35 @@ class OrdersTab:
             return
 
         order_id, _, _, _, _, _, current_status = self.tree.item(selected_item, "values")
-        new_status = simpledialog.askinteger(
-            "Изменить статус",
-            "Введите ID нового статуса (1: Черновик, 2: Согласован, 3: Принят, 4: Выполнен):"
-        )
+        status_var = StringVar()
 
-        if not new_status or new_status < 1 or new_status > 4:
-            messagebox.showwarning("Ошибка", "Некорректный статус!")
-            return
-
+        # Получение статусов из базы
         conn = connect_db()
         cursor = conn.cursor()
-        cursor.execute("UPDATE orders SET status_id = ? WHERE id = ?", (new_status, order_id))
-        conn.commit()
+        cursor.execute("SELECT id, status_name FROM order_status")
+        statuses = cursor.fetchall()
         conn.close()
 
-        self.load_orders()
-        messagebox.showinfo("Успех", f"Статус заказа с ID {order_id} изменён на {new_status}!")
+        form = Toplevel(self.frame)
+        form.title("Изменить статус")
+        form.geometry("300x150")
+
+        ttk.Label(form, text="Статус:").pack(pady=5)
+        status_combobox = ttk.Combobox(form, textvariable=status_var, values=[f"{s[0]}: {s[1]}" for s in statuses])
+        status_combobox.pack(fill="x", padx=10)
+
+        def update_status():
+            try:
+                status_id = int(status_var.get().split(":")[0])
+                conn = connect_db()
+                cursor = conn.cursor()
+                cursor.execute("UPDATE orders SET status_id = ? WHERE id = ?", (status_id, order_id))
+                conn.commit()
+                conn.close()
+                self.load_orders()
+                form.destroy()
+                messagebox.showinfo("Успех", f"Статус заказа с ID {order_id} изменён!")
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Не удалось изменить статус: {e}")
+
+        ttk.Button(form, text="Сохранить", command=update_status).pack(pady=10)
