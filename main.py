@@ -3,6 +3,8 @@ from tkinter import ttk
 from views.commercial_window import CommercialServiceWindow
 from views.production_view import ProductionServiceWindow
 from views.tech_view import TechServiceWindow
+import os
+import sys
 
 def center_window(window):
     """Центрирует окно на экране с учётом его текущего размера."""

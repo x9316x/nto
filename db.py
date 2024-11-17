@@ -1,11 +1,18 @@
 import sqlite3
 import os
+import sys
+
+def resource_path(relative_path):
+    """Возвращает путь к ресурсам (например, базе данных)."""
+    if hasattr(sys, '_MEIPASS'):
+        # Если запускается собранное приложение (.exe)
+        return os.path.join(sys._MEIPASS, relative_path)
+    else:
+        # Если приложение запускается как .py
+        return os.path.join(os.path.abspath("."), relative_path)
 
 # Путь к базе данных
-DB_PATH = "database/sawmill.db"
-
-# Создание папки для базы данных, если её нет
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+DB_PATH = resource_path("database/sawmill.db")
 
 def connect_db():
     """Создает подключение к базе данных."""

@@ -46,38 +46,7 @@ class OrdersTab:
         parent_window = self.frame.winfo_toplevel()
         parent_window.geometry("")  # Устанавливаем автоматический размер
        
-
-    # def setup_tab(self):
-    #     """Настраивает вкладку."""
-    #     ttk.Label(self.frame, text="Список заказов").pack(pady=10)
-
-    #     # Таблица
-    #     self.tree = ttk.Treeview(
-    #         self.frame,
-    #         columns=("ID", "Order Date", "Due Date", "Client", "Product", "Quantity", "Status", "Additional Info"),
-    #         show="headings"
-    #     )
-    #     self.tree.heading("ID", text="ID")
-    #     self.tree.heading("Order Date", text="Дата регистрации")
-    #     self.tree.heading("Due Date", text="Дата выполнения")
-    #     self.tree.heading("Client", text="Клиент")
-    #     self.tree.heading("Product", text="Продукт")
-    #     self.tree.heading("Quantity", text="Количество")
-    #     self.tree.heading("Status", text="Статус")
-    #     self.tree.heading("Additional Info", text="Дополнительная информация")
-    #     self.tree.pack(expand=True, fill="both", padx=10, pady=10)
-
-    #     # Кнопки управления
-    #     buttons_frame = ttk.Frame(self.frame)
-    #     buttons_frame.pack(pady=10)
-
-    #     ttk.Button(buttons_frame, text="Создать заказ", command=self.create_order).pack(side="left", padx=5)
-    #     ttk.Button(buttons_frame, text="Удалить заказ", command=self.delete_order).pack(side="left", padx=5)
-    #     ttk.Button(buttons_frame, text="Редактировать заказ", command=self.edit_order).pack(side="left", padx=5)
-
-    #     # Загрузка данных
-    #     self.load_orders()
-
+    
     def load_orders(self):
         """Загружает данные о заказах из базы с цветовым выделением по статусу."""
         conn = connect_db()
