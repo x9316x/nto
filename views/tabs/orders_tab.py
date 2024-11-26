@@ -170,6 +170,18 @@ class OrdersTab:
                 quantity = quantity_var.get()
                 due_date = due_date_var.get()
 
+                # Проверка корректности даты выполнения
+                if due_date:
+                    try:
+                        order_date = datetime.date.today()
+                        due_date_parsed = datetime.datetime.strptime(due_date, "%Y-%m-%d").date()
+                        if due_date_parsed <= order_date:
+                            messagebox.showwarning("Ошибка", "Дата выполнения должна быть позже даты создания!")
+                            return
+                    except ValueError:
+                        messagebox.showwarning("Ошибка", "Дата выполнения должна быть в формате ГГГГ-ММ-ДД!")
+                        return
+
                 # Сохранение данных
                 with connect_db() as conn:
                     cursor = conn.cursor()
