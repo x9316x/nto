@@ -5,8 +5,8 @@ from views.production_view import ProductionServiceWindow
 from views.tech_view import TechServiceWindow
 from db import create_tables
 from models import insert_initial_data
-import os
-import sys
+from tkinter import Button
+
 
 def center_window(window):
     """Центрирует окно на экране с учётом его текущего размера."""
@@ -19,8 +19,10 @@ def center_window(window):
     y = (screen_height - height) // 2
     window.geometry(f"{width}x{height}+{x}+{y}")
 
+
 # Главное окно
 root = tk.Tk()
+
 
 # Функции для открытия служб
 def open_commercial_service():
@@ -28,15 +30,18 @@ def open_commercial_service():
     center_window(window.window)  # Центрируем дочернее окно
     window.window.resizable(True, True)  # Разрешаем изменение размера
 
+
 def open_production_service():
     window = ProductionServiceWindow(root)
     center_window(window.window)  # Центрируем дочернее окно
     window.window.resizable(True, True)  # Разрешаем изменение размера
 
+
 def open_tech_service():
     window = TechServiceWindow(root)
     center_window(window.window)  # Центрируем дочернее окно
     window.window.resizable(True, True)  # Разрешаем изменение размера
+
 
 def main():
     # Инициализация базы данных
@@ -45,7 +50,12 @@ def main():
 
     # Настройка главного окна
     root.title("Система управления Лесозаводом №10")
-    center_window(root)  # Центрируем главное окно
+
+    # Задаём стартовый размер окна (ширина x высота)
+    root.geometry("300x350")
+
+    # Центрируем главное окно
+    center_window(root)
     root.resizable(True, True)  # Разрешаем изменение размера
 
     # Настройка растягивания
@@ -57,11 +67,12 @@ def main():
     label.pack(pady=20)
 
     # Кнопки служб
-    ttk.Button(root, text="Коммерческая служба", command=open_commercial_service).pack(pady=10)
-    ttk.Button(root, text="Служба производства", command=open_production_service).pack(pady=10)
-    ttk.Button(root, text="Служба технолога", command=open_tech_service).pack(pady=10)
+    Button(root, text="Коммерческая служба", command=open_commercial_service, width=20, height=3).pack(pady=10)
+    Button(root, text="Служба производства", command=open_production_service, width=20, height=3).pack(pady=10)
+    Button(root, text="Служба технолога", command=open_tech_service, width=20, height=3).pack(pady=10)
 
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
