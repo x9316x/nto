@@ -182,6 +182,11 @@ class OrdersTab:
                         messagebox.showwarning("Ошибка", "Дата выполнения должна быть в формате ГГГГ-ММ-ДД!")
                         return
 
+                # Проверка обязательных полей при согласованном статусе
+                if status == "Согласован клиентом" and (not client_id or not product_id or quantity <= 0):
+                    messagebox.showerror("Ошибка", "Для согласованного заказа заполните все обязательные поля!")
+                    return
+
                 # Сохранение данных
                 with connect_db() as conn:
                     cursor = conn.cursor()
