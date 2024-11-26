@@ -1,7 +1,6 @@
 import sqlite3
 import os
 import sys
-import shutil
 
 def resource_path(relative_path):
     """Возвращает путь к ресурсам (например, базе данных)."""
@@ -13,24 +12,15 @@ def resource_path(relative_path):
         return os.path.join(os.path.abspath("."), relative_path)
 
 def get_writable_db_path():
-    """Возвращает путь к базе данных, доступный для записи."""
-    # Папка пользователя
-    user_folder = os.path.expanduser("~")
-    app_folder = os.path.join(user_folder, "MyApp")  # Папка для вашего приложения
-    os.makedirs(app_folder, exist_ok=True)  # Создаём папку, если её нет
-
-    db_path = os.path.join(app_folder, "sawmill.db")  # Путь к базе в папке пользователя
-
-    # Копируем базу данных, если её там ещё нет
-    if not os.path.exists(db_path):
-        original_db_path = resource_path("database/sawmill.db")
-        shutil.copyfile(original_db_path, db_path)
-
-    return db_path
+    """Возвращает путь к базе данных, которая хранится рядом с приложением."""
+    base_path = os.path.abspath(os.path.join(".", "database", "sawmill.db"))
+    os.makedirs(os.path.dirname(base_path), exist_ok=True)
+    return base_path
 
 def connect_db():
     """Создает подключение к базе данных."""
     writable_db_path = get_writable_db_path()
+    print("Путь к базе данных:", writable_db_path)  # Для отладки
     return sqlite3.connect(writable_db_path)
 
 def create_tables():
@@ -83,7 +73,3 @@ def create_tables():
 
     conn.commit()
     conn.close()
-
-if __name__ == "__main__":
-    create_tables()
-    print("Таблицы созданы успешно!")

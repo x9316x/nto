@@ -3,6 +3,8 @@ from tkinter import ttk
 from views.commercial_window import CommercialServiceWindow
 from views.production_view import ProductionServiceWindow
 from views.tech_view import TechServiceWindow
+from db import create_tables
+from models import insert_initial_data
 import os
 import sys
 
@@ -37,6 +39,10 @@ def open_tech_service():
     window.window.resizable(True, True)  # Разрешаем изменение размера
 
 def main():
+    # Инициализация базы данных
+    create_tables()  # Создаём таблицы
+    insert_initial_data()  # Добавляем тестовые данные (если их нет)
+
     # Настройка главного окна
     root.title("Система управления Лесозаводом №10")
     center_window(root)  # Центрируем главное окно
