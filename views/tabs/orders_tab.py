@@ -1,4 +1,4 @@
-from tkinter import ttk, Toplevel, messagebox
+from tkinter import ttk, Toplevel, messagebox, Text
 from tkinter import StringVar, IntVar
 from db import connect_db
 import datetime  # Для работы с датами
@@ -37,6 +37,7 @@ class OrdersTab:
         ttk.Button(buttons_frame, text="Создать заказ", command=self.create_order).pack(side="left", padx=5)
         ttk.Button(buttons_frame, text="Удалить заказ", command=self.delete_order).pack(side="left", padx=5)
         ttk.Button(buttons_frame, text="Редактировать заказ", command=self.edit_order).pack(side="left", padx=5)
+        ttk.Button(buttons_frame, text="Согласовать заказ", command=self.approve_order).pack(side="left", padx=5)
 
         # Загрузка данных
         self.load_orders()
@@ -45,8 +46,7 @@ class OrdersTab:
         self.frame.update_idletasks()  # Обновляем геометрию окна
         parent_window = self.frame.winfo_toplevel()
         parent_window.geometry("")  # Устанавливаем автоматический размер
-       
-    
+
     def load_orders(self):
         """Загружает данные о заказах из базы с цветовым выделением по статусу."""
         conn = connect_db()
@@ -55,8 +55,8 @@ class OrdersTab:
             SELECT o.id, 
                 o.order_date, 
                 COALESCE(o.due_date, 'Дата не указана') AS due_date, 
-                COALESCE(c.contact_person, 'Не выбрано') AS client, 
-                COALESCE(p.name, 'Не выбрано') AS product, 
+                COALESCE(c.contact_person, '') AS client, 
+                COALESCE(p.name, '') AS product, 
                 COALESCE(o.quantity, 0) AS quantity, 
                 COALESCE(s.status_name, 'Черновик') AS status,
                 COALESCE(o.additional_info, 'Нет дополнительной информации') AS additional_info
@@ -123,14 +123,12 @@ class OrdersTab:
         """Форма для создания или редактирования заказа."""
         form = Toplevel(self.frame)
         form.title("Редактировать заказ" if order_id else "Создать заказ")
-        form.geometry("400x400")
+        form.geometry("400x500")
 
         client_var = StringVar(value=client)
         product_var = StringVar(value=product)
         quantity_var = IntVar(value=int(quantity) if quantity else 0)
         due_date_var = StringVar(value=due_date)
-        status_var = StringVar(value=status)
-        additional_info_var = StringVar(value=additional_info)
 
         # Получение данных из базы для выпадающих списков
         conn = connect_db()
@@ -139,8 +137,6 @@ class OrdersTab:
         clients = cursor.fetchall()
         cursor.execute("SELECT id, name FROM products")
         products = cursor.fetchall()
-        cursor.execute("SELECT id, status_name FROM order_status")
-        statuses = cursor.fetchall()
         conn.close()
 
         ttk.Label(form, text="Клиент:").pack(pady=5)
@@ -157,75 +153,67 @@ class OrdersTab:
         ttk.Label(form, text="Дата выполнения (ГГГГ-ММ-ДД):").pack(pady=5)
         ttk.Entry(form, textvariable=due_date_var).pack(fill="x", padx=10)
 
-        ttk.Label(form, text="Статус:").pack(pady=5)
-        status_combobox = ttk.Combobox(form, textvariable=status_var, values=[s[1] for s in statuses])
-        status_combobox.pack(fill="x", padx=10)
-
         ttk.Label(form, text="Дополнительная информация:").pack(pady=5)
-        ttk.Entry(form, textvariable=additional_info_var).pack(fill="x", padx=10)
+        additional_info_text = Text(form, height=5, wrap="word")
+        additional_info_text.pack(fill="both", padx=10, pady=5)
+        if additional_info:  # Если есть существующее значение, вставляем его в текстовое поле
+            additional_info_text.insert("1.0", additional_info)
 
         def save_order():
             try:
-                # Извлечение данных из полей
+                # Извлечение данных из текстового поля
+                additional_info = additional_info_text.get("1.0", "end").strip()
+
+                # Проверка полей
                 client_id = next((c[0] for c in clients if c[1] == client_var.get()), None)
                 product_id = next((p[0] for p in products if p[1] == product_var.get()), None)
-                status_id = next((s[0] for s in statuses if s[1] == status_var.get()), 1)  # Черновик по умолчанию
-                quantity = quantity_var.get() if quantity_var.get() else None
+                quantity = quantity_var.get()
                 due_date = due_date_var.get()
-                additional_info = additional_info_var.get()
 
-                # Проверка обязательных полей
-                if not client_id or not product_id or not quantity or quantity <= 0:
-                    messagebox.showwarning(
-                        "Ошибка",
-                        "Для сохранения заказа необходимо указать клиента, вид лесопродукции и положительное количество!"
-                    )
-                    return
-
-                # Проверка корректности даты выполнения
-                if due_date:
-                    try:
-                        today = datetime.date.today()
-                        due_date_parsed = datetime.datetime.strptime(due_date, "%Y-%m-%d").date()
-                        if due_date_parsed <= today:
-                            messagebox.showwarning(
-                                "Ошибка",
-                                "Дата выполнения заказа должна быть позже текущей даты!"
-                            )
-                            return
-                    except ValueError:
-                        messagebox.showwarning(
-                            "Ошибка",
-                            "Дата выполнения должна быть в формате ГГГГ-ММ-ДД!"
-                        )
-                        return
-
-                # Сохранение данных в базу
+                # Сохранение данных
                 with connect_db() as conn:
                     cursor = conn.cursor()
-                    if order_id:  # Если редактируется существующий заказ
+                    if order_id:
                         cursor.execute("""
-                            UPDATE orders
-                            SET due_date = ?, client_id = ?, product_id = ?, quantity = ?, status_id = ?, additional_info = ?
+                            UPDATE orders SET due_date = ?, client_id = ?, product_id = ?, quantity = ?, additional_info = ?
                             WHERE id = ?
-                        """, (due_date, client_id, product_id, quantity, status_id, additional_info, order_id))
-                        messagebox.showinfo("Успех", "Заказ успешно обновлён!")
-                    else:  # Если создаётся новый заказ
+                        """, (due_date, client_id, product_id, quantity, additional_info, order_id))
+                    else:
                         cursor.execute("""
                             INSERT INTO orders (order_date, due_date, client_id, product_id, quantity, status_id, additional_info)
-                            VALUES (DATE('now'), ?, ?, ?, ?, ?, ?)
-                        """, (due_date, client_id, product_id, quantity, status_id, additional_info))
-                        messagebox.showinfo("Успех", "Заказ успешно создан!")
+                            VALUES (DATE('now'), ?, ?, ?, ?, 1, ?)
+                        """, (due_date, client_id, product_id, quantity, additional_info))
                     conn.commit()
 
                 self.load_orders()
                 form.destroy()
-            except ValueError:
-                messagebox.showwarning("Ошибка", "Заполните все обязательные поля корректно!")
             except Exception as e:
-                messagebox.showerror("Ошибка", f"Не удалось сохранить заказ: {e}")
+                messagebox.showerror("Ошибка", f"Ошибка сохранения: {e}")
 
         ttk.Button(form, text="Сохранить", command=save_order).pack(pady=10)
+
+    def approve_order(self):
+        """Согласовывает выбранный заказ."""
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Ошибка", "Выберите заказ для согласования!")
+            return
+
+        order_id = self.tree.item(selected_item, "values")[0]
+        with connect_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT client_id, product_id, quantity FROM orders WHERE id = ?", (order_id,))
+            order = cursor.fetchone()
+
+            if not order or not order[0] or not order[1] or order[2] <= 0:
+                messagebox.showwarning("Ошибка", "Для согласования заполните поля клиент, продукт и количество > 0!")
+                return
+
+            cursor.execute("UPDATE orders SET status_id = 2 WHERE id = ?", (order_id,))
+            conn.commit()
+
+        self.load_orders()
+        messagebox.showinfo("Успех", f"Заказ ID {order_id} согласован!")
 
     def delete_order(self):
         """Удаляет выбранный заказ."""
@@ -241,4 +229,4 @@ class OrdersTab:
             conn.commit()
 
         self.load_orders()
-        messagebox.showinfo("Успех", f"Заказ с ID {order_id} удалён!")
+        messagebox.showinfo("Успех", f"Заказ ID {order_id} удалён!")
