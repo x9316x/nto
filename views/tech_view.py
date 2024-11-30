@@ -1,6 +1,7 @@
 from tkinter import ttk, Toplevel
 from views.tabs.products_tab import ProductsTab
 from views.tabs.workshops_tab import WorkshopsTab  # Импортируем вкладку "Цеха завода"
+from views.tabs.sections_tab import SectionsTab  # Импортируем вкладку "Участки"
 
 class TechServiceWindow:
     def __init__(self, parent):
@@ -17,3 +18,6 @@ class TechServiceWindow:
 
         # Вкладка "Цеха завода"
         self.workshops_tab = WorkshopsTab(self.notebook)  # Полный функционал через WorkshopsTab
+
+        # Вкладка "Участки"
+        self.sections_tab = SectionsTab(self.notebook)  # Полный функционал через SectionsTab
