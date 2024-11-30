@@ -3,6 +3,7 @@ from tkinter import StringVar, IntVar
 from db import connect_db
 from views.tabs.products_tab import ProductsTab
 from views.tabs.orders_tab import OrdersTab
+from views.tabs.workshops_tab import WorkshopsTab  # Импортируем вкладку "Цеха завода"
 
 class ProductionServiceWindow:
     def __init__(self, parent):
@@ -19,3 +20,6 @@ class ProductionServiceWindow:
 
         # Вкладка "Заказы"
         self.orders_tab = OrdersTab(self.notebook)  # Полный функционал через OrdersTab
+
+        # Вкладка "Цеха завода"
+        self.workshops_tab = WorkshopsTab(self.notebook)  # Полный функционал через WorkshopsTab

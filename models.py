@@ -52,6 +52,15 @@ def insert_initial_data():
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, orders)
 
+    # Добавляем цеха завода
+    workshops = [
+        ("Лесопильный цех",),
+        ("Сушильный комплекс",),
+        ("Цех строжки и обработки",),
+        ("Пеллетный цех",)
+    ]
+    cursor.executemany("INSERT INTO workshops (name) VALUES (?)", workshops)
+
     conn.commit()
     conn.close()
     print("Тестовые данные добавлены успешно!")

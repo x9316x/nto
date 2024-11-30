@@ -71,5 +71,13 @@ def create_tables():
         )
     """)
 
+    # Новая таблица "Цеха завода"
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS workshops (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
+        )
+    """)
+
     conn.commit()
     conn.close()
