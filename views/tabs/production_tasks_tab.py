@@ -112,7 +112,7 @@ class ProductionTasksTab:
 
         form = Toplevel(self.frame)
         form.title("Регистрация задания на производство")
-        form.geometry("400x500")
+        form.geometry("400x600")
 
         # Поля формы
         Label(form, text="Дата регистрации задания").pack(pady=5)
