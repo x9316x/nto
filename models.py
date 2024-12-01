@@ -82,9 +82,9 @@ def insert_initial_data():
 
     # Добавляем задания на производство
     production_tasks = [
-        ("2024-12-01", "2025-01-05", 1, 1, 50, str(sawmill_id), "Задание для лесопильного цеха."),
-        ("2024-12-02", "2025-01-15", 2, 2, 100, f"{sawmill_id},{drying_id}", "Для лесопильного и сушильного цехов."),
-        ("2024-12-03", "2025-01-20", 3, 4, 30, f"{sawmill_id},{drying_id},{planing_id}", "Для всех цехов."),
+        ("2024-12-01", "2025-01-05", 1, "Сырые пиломатериалы", 50, str(sawmill_id), "Задание для лесопильного цеха."),
+        ("2024-12-02", "2025-01-15", 2, "Сухие пиломатериалы", 100, f"{sawmill_id},{drying_id}", "Для лесопильного и сушильного цехов."),
+        ("2024-12-03", "2025-01-20", 3, "Рейки", 30, f"{sawmill_id},{drying_id},{planing_id}", "Для всех цехов."),
     ]
     cursor.executemany("""
         INSERT INTO production_tasks (registration_date, start_date, order_id, product_id, quantity, workshops, additional_info)
@@ -95,7 +95,7 @@ def insert_initial_data():
     preparation_tasks = [
         ("2024-12-02", "2025-01-05", 1, 1, "Подготовка лесопильной линии №1", "Создано"),
         ("2024-12-10", "2025-01-14", 2, 2, "Подготовка сушильной камеры №1", "Создано"),
-        ("2024-12-15", "2025-01-18", 3, 3, "Подготовка линии строжки №1", "Создано")
+        ("2024-12-15", "2025-01-18", 3, 2, "Подготовка линии строжки №1", "Создано")
     ]
     cursor.executemany("""
         INSERT INTO preparation_tasks (registration_date, required_date, production_task_id, section_id, additional_info, status)
