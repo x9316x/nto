@@ -15,9 +15,28 @@ class TechServiceWindow:
 
         # Вкладка "Виды лесопродукции"
         self.products_tab = ProductsTab(self.notebook)  # Полный функционал через ProductsTab
+        self.notebook.add(self.products_tab.frame, text="Виды лесопродукции")
 
         # Вкладка "Цеха завода"
         self.workshops_tab = WorkshopsTab(self.notebook)  # Полный функционал через WorkshopsTab
+        self.notebook.add(self.workshops_tab.frame, text="Цеха завода")
 
         # Вкладка "Участки"
         self.sections_tab = SectionsTab(self.notebook)  # Полный функционал через SectionsTab
+        self.notebook.add(self.sections_tab.frame, text="Участки")
+
+        # Привязка события смены вкладки
+        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
+
+    def on_tab_change(self, event):
+        """Обработчик смены вкладки, обновляет данные на текущей вкладке."""
+        selected_tab = self.notebook.select()  # Получаем ID текущей вкладки
+        current_tab = self.notebook.nametowidget(selected_tab)  # Получаем виджет текущей вкладки
+
+        # Проверяем текущую вкладку и вызываем метод обновления данных
+        if current_tab == self.products_tab.frame:
+            self.products_tab.load_products()  # Загружаем данные для вкладки "Виды лесопродукции"
+        elif current_tab == self.workshops_tab.frame:
+            self.workshops_tab.load_workshops()  # Загружаем данные для вкладки "Цеха завода"
+        elif current_tab == self.sections_tab.frame:
+            self.sections_tab.load_sections()  # Загружаем данные для вкладки "Участки"
