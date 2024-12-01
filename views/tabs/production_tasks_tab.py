@@ -154,9 +154,16 @@ class ProductionTasksTab:
             try:
                 start_date_obj = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
                 registration_date_obj = datetime.date.today()
+                due_date_obj = datetime.datetime.strptime(due_date, "%Y-%m-%d").date()
+
                 if start_date_obj < registration_date_obj:
                     messagebox.showwarning("Ошибка", "Дата начала выполнения не может быть раньше даты регистрации!")
                     return
+
+                if start_date_obj > due_date_obj:
+                    messagebox.showwarning("Ошибка", "Дата начала выполнения не может быть позже срока выполнения заказа!")
+                    return
+
             except ValueError:
                 messagebox.showwarning("Ошибка", "Введите дату начала выполнения задания в формате YYYY-MM-DD!")
                 return
