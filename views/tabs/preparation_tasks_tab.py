@@ -134,7 +134,7 @@ class PreparationTasksTab:
 
             try:
                 required_date_obj = datetime.datetime.strptime(required_date, "%Y-%m-%d").date()
-                if required_date_obj >= datetime.datetime.strptime(start_date, "%Y-%m-%d").date():
+                if required_date_obj > datetime.datetime.strptime(start_date, "%Y-%m-%d").date():
                     messagebox.showwarning("Ошибка", "Дата выполнения должна быть раньше даты начала производства!")
                     return
             except ValueError:

@@ -1,6 +1,6 @@
 from tkinter import ttk, StringVar, messagebox
 from db import connect_db
-
+import datetime
 
 class DesktopTab:
     def __init__(self, parent):
@@ -40,6 +40,11 @@ class DesktopTab:
         self.tree.heading("Status", text="Статус")
         self.tree.pack(expand=True, fill="both", padx=10, pady=5)
 
+        # Настройка цветовых тегов
+        self.tree.tag_configure("on_date", background="red")  # Совпадает с датой начала производства
+        self.tree.tag_configure("before_date", background="yellow")  # За день до начала производства
+        self.tree.tag_configure("default", background="white")  # Обычные строки
+
         # Загрузка данных
         self.load_workshops()
         self.load_tasks()
@@ -64,10 +69,11 @@ class DesktopTab:
         conn = connect_db()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT pt.id, pt.required_date, s.name, s.description, pt.status
+            SELECT pt.id, pt.required_date, s.name, s.description, pt.status, p.start_date
             FROM preparation_tasks pt
             JOIN sections s ON pt.section_id = s.id
             JOIN workshops w ON s.workshop_id = w.id
+            JOIN production_tasks p ON pt.production_task_id = p.id
             WHERE pt.status = 'Создано' AND w.name = ?
         """, (selected_workshop,))
         tasks = cursor.fetchall()
@@ -77,6 +83,17 @@ class DesktopTab:
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        # Заполняем таблицу данными
+        # Заполняем таблицу данными с цветовой дифференциацией
         for task in tasks:
-            self.tree.insert("", "end", values=task)
+            task_id, required_date, section_name, description, status, start_date = task
+            required_date_obj = datetime.datetime.strptime(required_date, "%Y-%m-%d").date()
+            start_date_obj = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
+
+            if required_date_obj == start_date_obj:
+                tag = "on_date"
+            elif required_date_obj == (start_date_obj - datetime.timedelta(days=1)):
+                tag = "before_date"
+            else:
+                tag = "default"
+
+            self.tree.insert("", "end", values=(task_id, required_date, section_name, description, status), tags=(tag,))
