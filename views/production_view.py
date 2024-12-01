@@ -5,6 +5,7 @@ from views.tabs.products_tab import ProductsTab
 from views.tabs.orders_tab import OrdersTab
 from views.tabs.workshops_tab import WorkshopsTab  # Импортируем вкладку "Цеха завода"
 from views.tabs.sections_tab import SectionsTab  # Импортируем вкладку "Участки"
+from views.tabs.production_tasks_tab import ProductionTasksTab  # Импортируем вкладку "Задания на производство"
 
 class ProductionServiceWindow:
     def __init__(self, parent):
@@ -27,3 +28,6 @@ class ProductionServiceWindow:
 
         # Вкладка "Участки"
         self.sections_tab = SectionsTab(self.notebook)  # Полный функционал через SectionsTab
+
+        # Вкладка "Задания на производство"
+        self.production_tasks_tab = ProductionTasksTab(self.notebook)  # Полный функционал через ProductionTasksTab
