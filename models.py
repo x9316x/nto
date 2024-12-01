@@ -27,7 +27,9 @@ def insert_initial_data():
     clients = [
         ("Иван Иванов", "1234567890", "ivanov@mail.com"),
         ("Петр Петров", "0987654321", "petrov@mail.com"),
-        ("Анна Смирнова", "1122334455", "smirnova@mail.com")
+        ("Игорь Сидоров", "88005553535", "prosche@mail.com"),
+        ("Ирина Семенова", "111222333", "sema@mail.com"),
+        ("Алла Денисова", "2468163264", "denisova@mail.com")
     ]
     cursor.executemany("INSERT INTO clients (contact_person, phone, email) VALUES (?, ?, ?)", clients)
 
@@ -42,9 +44,9 @@ def insert_initial_data():
 
     # Добавляем заказы
     orders = [
-        ("2024-11-01", "2024-11-15", 1, 1, 50, "Требуется доставка до склада", 2),  # Сырые пиломатериалы
-        ("2024-11-02", "2024-11-20", 2, 2, 100, "Особые условия хранения", 2),    # Сухие пиломатериалы
-        ("2024-11-03", "2024-11-25", 3, 4, 30, "Доставка в течение дня", 2),     # Рейки
+        ("2024-11-01", "2025-01-15", 1, 1, 50, "Требуется доставка до склада", 2),  # Сырые пиломатериалы
+        ("2024-11-02", "2025-01-20", 2, 2, 100, "Особые условия хранения", 2),    # Сухие пиломатериалы
+        ("2024-11-03", "2025-01-25", 3, 4, 30, "Доставка в течение дня", 2),     # Рейки
     ]
     cursor.executemany("""
         INSERT INTO orders (order_date, due_date, client_id, product_id, quantity, additional_info, status_id)
@@ -88,9 +90,27 @@ def insert_initial_data():
     ]
     cursor.executemany("INSERT INTO sections (name, workshop_id, description) VALUES (?, ?, ?)", sections)
 
+    # Добавляем задания на производство
+    production_tasks = [
+        ("2024-12-01", "2025-01-05", 1, 1, 50, str(sawmill_id), "Задание для лесопильного цеха."),
+        ("2024-12-02", "2025-01-15", 2, 2, 100, f"{sawmill_id},{drying_id}", "Для лесопильного и сушильного цехов."),
+        ("2024-12-03", "2025-01-20", 3, 4, 30, f"{sawmill_id},{drying_id},{planing_id}", "Для всех цехов."),
+    ]
+    cursor.executemany("""
+        INSERT INTO production_tasks (registration_date, start_date, order_id, product_id, quantity, workshops, additional_info)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, production_tasks)
+
+    # Обновляем статусы заказов на "Принят в производство"
+    cursor.execute("""
+        UPDATE orders
+        SET status_id = (SELECT id FROM order_status WHERE status_name = 'Принят в производство')
+        WHERE id IN (1, 2, 3)
+    """)
+
     conn.commit()
     conn.close()
-    print("Тестовые данные добавлены успешно!")
+    print("Тестовые данные успешно добавлены!")
 
 if __name__ == "__main__":
     insert_initial_data()
