@@ -47,6 +47,11 @@ class PreparationTasksTab:
         # Загрузка данных
         self.load_production_tasks()
         self.load_preparation_tasks()
+        
+        # Центрируем окно после настройки содержимого
+        self.frame.update_idletasks()  # Обновляем геометрию окна
+        parent_window = self.frame.winfo_toplevel()
+        parent_window.geometry("")  # Устанавливаем автоматический размер
 
     def load_production_tasks(self):
         """Загружает задания на производство."""
