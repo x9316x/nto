@@ -47,6 +47,7 @@ class DesktopTab:
 
         # Загрузка данных
         self.load_workshops()
+        self.selected_workshop.set("Все задания")  # Устанавливаем "Все задания" по умолчанию
         self.load_tasks()
 
     def load_workshops(self):
@@ -58,9 +59,7 @@ class DesktopTab:
         conn.close()
 
         # Устанавливаем значения в выпадающий список
-        self.workshop_combobox["values"] = [w[0] for w in workshops]
-        if workshops:
-            self.selected_workshop.set(workshops[0][0])  # Устанавливаем первый цех как выбранный
+        self.workshop_combobox["values"] = ["Все задания"] + [w[0] for w in workshops]
 
     def load_tasks(self):
         """Загружает задания из таблицы preparation_tasks со статусом 'Создано'."""
@@ -68,14 +67,24 @@ class DesktopTab:
 
         conn = connect_db()
         cursor = conn.cursor()
-        cursor.execute("""
-            SELECT pt.id, pt.required_date, s.name, s.description, pt.status, p.start_date
-            FROM preparation_tasks pt
-            JOIN sections s ON pt.section_id = s.id
-            JOIN workshops w ON s.workshop_id = w.id
-            JOIN production_tasks p ON pt.production_task_id = p.id
-            WHERE pt.status = 'Создано' AND w.name = ?
-        """, (selected_workshop,))
+        if selected_workshop == "Все задания":
+            cursor.execute("""
+                SELECT pt.id, pt.required_date, s.name, s.description, pt.status, p.start_date
+                FROM preparation_tasks pt
+                JOIN sections s ON pt.section_id = s.id
+                JOIN workshops w ON s.workshop_id = w.id
+                JOIN production_tasks p ON pt.production_task_id = p.id
+                WHERE pt.status = 'Создано'
+            """)
+        else:
+            cursor.execute("""
+                SELECT pt.id, pt.required_date, s.name, s.description, pt.status, p.start_date
+                FROM preparation_tasks pt
+                JOIN sections s ON pt.section_id = s.id
+                JOIN workshops w ON s.workshop_id = w.id
+                JOIN production_tasks p ON pt.production_task_id = p.id
+                WHERE pt.status = 'Создано' AND w.name = ?
+            """, (selected_workshop,))
         tasks = cursor.fetchall()
         conn.close()
 
