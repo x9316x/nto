@@ -3,6 +3,7 @@ from views.tabs.products_tab import ProductsTab
 from views.tabs.workshops_tab import WorkshopsTab  # Импортируем вкладку "Цеха завода"
 from views.tabs.sections_tab import SectionsTab  # Импортируем вкладку "Участки"
 from views.tabs.preparation_tasks_tab import PreparationTasksTab  # Импортируем вкладку "Задания на подготовку"
+from views.tabs.desktop_tab import DesktopTab  # Импортируем вкладку "Рабочий стол"
 
 class TechServiceWindow:
     def __init__(self, parent):
@@ -30,6 +31,10 @@ class TechServiceWindow:
         self.preparation_tasks_tab = PreparationTasksTab(self.notebook)  # Полный функционал через PreparationTasksTab
         self.notebook.add(self.preparation_tasks_tab.frame, text="Задания на подготовку")
 
+        # Вкладка "Рабочий стол"
+        self.desktop_tab = DesktopTab(self.notebook)  # Полный функционал через DesktopTab
+        self.notebook.add(self.desktop_tab.frame, text="Рабочий стол")
+
         # Привязка события смены вкладки
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
 
@@ -47,3 +52,5 @@ class TechServiceWindow:
             self.sections_tab.load_sections()  # Загружаем данные для вкладки "Участки"
         elif current_tab == self.preparation_tasks_tab.frame:
             self.preparation_tasks_tab.load_preparation_tasks()  # Загружаем данные для вкладки "Задания на подготовку"
+        elif current_tab == self.desktop_tab.frame:
+            self.desktop_tab.load_tasks()  # Загружаем данные для вкладки "Рабочий стол"
