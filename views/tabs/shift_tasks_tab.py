@@ -138,7 +138,7 @@ class ShiftTasksTab:
         shift_date_entry.pack(pady=5, fill="x", padx=10)
 
         # Поле "Выбор участка"
-        Label(form, text="Выбор участка").pack(pady=5)
+        Label(form, text="Выбор участка: нажать дважды, для прогрузки свободных участков").pack(pady=5)
         sections_combobox = ttk.Combobox(form, state="readonly")
         sections_combobox.pack(pady=5, fill="x", padx=10)
 

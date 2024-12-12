@@ -4,6 +4,7 @@ from views.tabs.orders_tab import OrdersTab
 from views.tabs.workshops_tab import WorkshopsTab
 from views.tabs.sections_tab import SectionsTab
 from views.tabs.production_tasks_tab import ProductionTasksTab
+from views.tabs.shift_tasks_tab import ShiftTasksTab  # Импортируем вкладку "Задания на смену"
 
 class ProductionServiceWindow:
     def __init__(self, parent):
@@ -35,6 +36,10 @@ class ProductionServiceWindow:
         self.production_tasks_tab = ProductionTasksTab(self.notebook)
         self.notebook.add(self.production_tasks_tab.frame, text="Задания на производство")
 
+        # Вкладка "Задания на смену"
+        self.shift_tasks_tab = ShiftTasksTab(self.notebook)  # Полный функционал через ShiftTasksTab
+        self.notebook.add(self.shift_tasks_tab.frame, text="Задания на смену")
+
         # Привязка события смены вкладки
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
 
@@ -55,3 +60,7 @@ class ProductionServiceWindow:
         elif current_tab == self.production_tasks_tab.frame:
             self.production_tasks_tab.load_orders()  # Загружаем заказы для вкладки "Задания на производство"
             self.production_tasks_tab.load_tasks()  # Загружаем задания для вкладки "Задания на производство"
+        elif current_tab == self.shift_tasks_tab.frame:
+            self.shift_tasks_tab.load_production_tasks()  # Загружаем данные для вкладки "Задания на смену"
+        elif current_tab == self.shift_tasks_tab.frame:
+            self.shift_tasks_tab.load_shift_tasks()  # Загружаем данные для вкладки "Задания на смену"        
