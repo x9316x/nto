@@ -5,6 +5,8 @@ from views.tabs.workshops_tab import WorkshopsTab
 from views.tabs.sections_tab import SectionsTab
 from views.tabs.production_tasks_tab import ProductionTasksTab
 from views.tabs.shift_tasks_tab import ShiftTasksTab  # Импортируем вкладку "Задания на смену"
+from views.tabs.calendar_tab import CalendarTab  # Импортируем вкладку "Календарь рабочих смен"
+
 
 class ProductionServiceWindow:
     def __init__(self, parent):
@@ -40,6 +42,10 @@ class ProductionServiceWindow:
         self.shift_tasks_tab = ShiftTasksTab(self.notebook)  # Полный функционал через ShiftTasksTab
         self.notebook.add(self.shift_tasks_tab.frame, text="Задания на смену")
 
+        # Вкладка "Календарь рабочих смен"
+        self.calendar_tab = CalendarTab(self.notebook)  # Полный функционал через CalendarTab
+        self.notebook.add(self.calendar_tab.frame, text="Календарь рабочих смен")
+
         # Привязка события смены вкладки
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_changed)
 
@@ -62,5 +68,7 @@ class ProductionServiceWindow:
             self.production_tasks_tab.load_tasks()  # Загружаем задания для вкладки "Задания на производство"
         elif current_tab == self.shift_tasks_tab.frame:
             self.shift_tasks_tab.load_production_tasks()  # Загружаем данные для вкладки "Задания на смену"
-        elif current_tab == self.shift_tasks_tab.frame:
-            self.shift_tasks_tab.load_shift_tasks()  # Загружаем данные для вкладки "Задания на смену"        
+            self.shift_tasks_tab.load_shift_tasks()  # Загружаем данные для вкладки "Задания на смену"
+        elif current_tab == self.calendar_tab.frame:
+            # Добавьте логику для обновления вкладки "Календарь рабочих смен", если потребуется
+            pass
