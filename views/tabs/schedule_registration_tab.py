@@ -99,7 +99,7 @@ class ScheduleRegistrationTab:
         employees_listbox.pack(pady=5, fill="both", expand=True)
 
         # Мастер
-        Label(form, text="Мастер (выберите из сотрудников):").pack(pady=5)
+        Label(form, text="Мастер (по умолчанию выбирается первый выбранный сотрудник):").pack(pady=5)
         master_combobox = ttk.Combobox(form, state="readonly")
         master_combobox.pack(pady=5, fill="x")
 
