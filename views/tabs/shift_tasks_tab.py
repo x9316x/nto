@@ -141,7 +141,13 @@ class ShiftTasksTab:
         Label(form, text="Выбор участка").pack(pady=5)
         sections_combobox = ttk.Combobox(form, state="readonly")
         sections_combobox.pack(pady=5, fill="x", padx=10)
-        self.load_sections_for_workshops(sections_combobox, workshops)
+
+        def on_date_change(event):
+            selected_date = shift_date_entry.get().strip()
+            if selected_date:
+                self.load_sections_for_date(sections_combobox, selected_date)
+
+        shift_date_entry.bind("<FocusOut>", on_date_change)
 
         # Поле "Дополнительное описание"
         Label(form, text="Дополнительное описание").pack(pady=5)
@@ -173,6 +179,11 @@ class ShiftTasksTab:
                     INSERT INTO shift_tasks (creation_date, production_task_id, shift_date, section_name, additional_info)
                     VALUES (?, ?, ?, ?, ?)
                 """, (creation_date, production_task_id, shift_date, section_name, additional_info))
+
+                cursor.execute("""
+                    INSERT INTO section_availability (section_id, date)
+                    VALUES ((SELECT id FROM sections WHERE name = ?), ?)
+                """, (section_name, shift_date))
                 conn.commit()
                 messagebox.showinfo("Успех", "Задание на смену зарегистрировано!")
                 self.load_shift_tasks()  # Обновляем таблицу заданий на смену
@@ -186,17 +197,20 @@ class ShiftTasksTab:
 
         ttk.Button(form, text="Сохранить", command=save_task).pack(pady=10)
 
-    def load_sections_for_workshops(self, combobox, workshops):
-        """Загружает участки для выбора на основе ID цехов."""
-        workshop_ids = [int(w) for w in workshops.split(",")]
+    def load_sections_for_date(self, combobox, date):
+        """Загружает список свободных участков на указанную дату."""
         conn = connect_db()
         cursor = conn.cursor()
         try:
             cursor.execute("""
-                SELECT name
-                FROM sections
-                WHERE workshop_id IN ({})
-            """.format(",".join("?" * len(workshop_ids))), workshop_ids)
+                SELECT name 
+                FROM sections 
+                WHERE id NOT IN (
+                    SELECT section_id 
+                    FROM section_availability 
+                    WHERE date = ?
+                )
+            """, (date,))
             sections = cursor.fetchall()
             combobox["values"] = [s[0] for s in sections]
         except Exception as e:

@@ -134,5 +134,16 @@ def create_tables():
         )
     """)
 
+
+    # Таблица "Занятость участков"
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS section_availability (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            section_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            FOREIGN KEY (section_id) REFERENCES sections(id)
+        )
+    """)
+
     conn.commit()
     conn.close()
