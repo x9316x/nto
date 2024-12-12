@@ -78,7 +78,7 @@ def main():
     Button(root, text="Коммерческая служба", command=open_commercial_service, width=20, height=3).pack(pady=10)
     Button(root, text="Служба производства", command=open_production_service, width=20, height=3).pack(pady=10)
     Button(root, text="Служба технолога", command=open_tech_service, width=20, height=3).pack(pady=10)
-    Button(root, text="Служба персонала", command=open_personal_service, width=20, height=3).pack(pady=10)
+    Button(root, text="Персонал", command=open_personal_service, width=20, height=3).pack(pady=10)
     
     root.mainloop()
 

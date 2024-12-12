@@ -3,6 +3,7 @@ from tkinter import ttk
 from views.tabs.brigade_types_tab import BrigadeTypesTab
 from views.tabs.employees_tab import EmployeesTab
 from views.tabs.schedule_registration_tab import ScheduleRegistrationTab  # Импортируем новую вкладку
+from views.tabs.brigade_schedule_tab import BrigadeScheduleTab
 
 class PersonalServiceWindow:
     def __init__(self, parent):
@@ -23,6 +24,10 @@ class PersonalServiceWindow:
 
         self.schedule_registration_tab = ScheduleRegistrationTab(self.notebook)  # Подключаем вкладку регистрации расписания
         self.notebook.add(self.schedule_registration_tab.frame, text="Регистрация расписания")
+
+        # Добавляем вкладку расписания
+        self.brigade_schedule_tab = BrigadeScheduleTab(self.notebook)
+        self.notebook.add(self.brigade_schedule_tab.frame, text="Календарь работы бригад")
 
         # Привязка события смены вкладки
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
