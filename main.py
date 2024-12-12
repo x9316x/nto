@@ -7,6 +7,8 @@ from db import create_tables
 from models import insert_initial_data
 from tkinter import Button
 
+from views.personal_window import PersonalServiceWindow
+
 
 def center_window(window):
     """Центрирует окно на экране с учётом его текущего размера."""
@@ -43,6 +45,12 @@ def open_tech_service():
     window.window.resizable(True, True)  # Разрешаем изменение размера
 
 
+def open_personal_service():
+    window = PersonalServiceWindow(root)
+    center_window(window.window)  # Центрируем дочернее окно
+    window.window.resizable(True, True)  # Разрешаем изменение размера
+
+
 def main():
     # Инициализация базы данных
     create_tables()  # Создаём таблицы
@@ -52,7 +60,7 @@ def main():
     root.title("Система управления Лесозаводом №10")
 
     # Задаём стартовый размер окна (ширина x высота)
-    root.geometry("300x350")
+    root.geometry("300x400")
 
     # Центрируем главное окно
     center_window(root)
@@ -70,7 +78,8 @@ def main():
     Button(root, text="Коммерческая служба", command=open_commercial_service, width=20, height=3).pack(pady=10)
     Button(root, text="Служба производства", command=open_production_service, width=20, height=3).pack(pady=10)
     Button(root, text="Служба технолога", command=open_tech_service, width=20, height=3).pack(pady=10)
-
+    Button(root, text="Служба персонала", command=open_personal_service, width=20, height=3).pack(pady=10)
+    
     root.mainloop()
 
 

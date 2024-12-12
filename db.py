@@ -145,5 +145,27 @@ def create_tables():
         )
     """)
 
+    # Таблица "Виды бригад"
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS brigade_types (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT
+        )
+    """)
+
+    # Таблица "Сотрудники"
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS employees (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            birth_year INTEGER NOT NULL
+        )
+    """)
+
+
+
+
+
     conn.commit()
     conn.close()
