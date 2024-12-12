@@ -134,7 +134,7 @@ def insert_initial_data():
     # Добавляем занятость участков
     section_availability = [
         (1, "2025-01-01"),
-        (2, "2025-01-01"),
+        (10, "2025-01-01"),
         (3, "2025-01-02"),
     ]
     cursor.executemany("""
