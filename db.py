@@ -163,8 +163,20 @@ def create_tables():
         )
     """)
 
-
-
+    # Таблица "Расписание бригад"
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS brigade_schedule (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            brigade_type_id INTEGER NOT NULL,
+            section_id INTEGER NOT NULL,
+            start_date TEXT NOT NULL,
+            work_mode TEXT NOT NULL,
+            members TEXT NOT NULL,
+            master TEXT NOT NULL,
+            FOREIGN KEY (brigade_type_id) REFERENCES brigade_types(id),
+            FOREIGN KEY (section_id) REFERENCES sections(id)
+        )
+    """)
 
 
     conn.commit()
