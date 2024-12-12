@@ -200,6 +200,26 @@ class ScheduleRegistrationTab:
             messagebox.showerror("Ошибка", "Введите дату начала работы в формате YYYY-MM-DD!")
             return
 
+        # Проверка уникальности сотрудников
+        try:
+            conn = connect_db()
+            cursor = conn.cursor()
+
+            # Проверка сотрудников в других бригадах
+            employee_ids = [emp.split(" - ")[0] for emp in selected_employees]
+            cursor.execute("""
+                SELECT DISTINCT s.id
+                FROM brigade_schedule s
+                WHERE s.members LIKE ?
+                AND s.start_date = ?
+            """, ("%{}%".format(employee_ids[0]), start_date))
+            existing_employees = cursor.fetchall()
+            if existing_employees:
+                messagebox.showerror("Ошибка", "Некоторые сотрудники уже задействованы в другой бригаде на указанную дату!")
+                return
+        finally:
+            conn.close()
+
         # Сохранение данных
         try:
             conn = connect_db()
