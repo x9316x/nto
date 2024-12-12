@@ -4,6 +4,7 @@ from views.tabs.workshops_tab import WorkshopsTab  # Импортируем вк
 from views.tabs.sections_tab import SectionsTab  # Импортируем вкладку "Участки"
 from views.tabs.preparation_tasks_tab import PreparationTasksTab  # Импортируем вкладку "Задания на подготовку"
 from views.tabs.desktop_tab import DesktopTab  # Импортируем вкладку "Рабочий стол"
+from views.tabs.shift_tasks_tab import ShiftTasksTab  # Импортируем вкладку "Задания на смену"
 
 class TechServiceWindow:
     def __init__(self, parent):
@@ -35,6 +36,10 @@ class TechServiceWindow:
         self.desktop_tab = DesktopTab(self.notebook)  # Полный функционал через DesktopTab
         self.notebook.add(self.desktop_tab.frame, text="Рабочий стол")
 
+        # Вкладка "Задания на смену"
+        self.shift_tasks_tab = ShiftTasksTab(self.notebook)  # Полный функционал через ShiftTasksTab
+        self.notebook.add(self.shift_tasks_tab.frame, text="Задания на смену")
+
         # Привязка события смены вкладки
         self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
 
@@ -54,3 +59,7 @@ class TechServiceWindow:
             self.preparation_tasks_tab.load_preparation_tasks()  # Загружаем данные для вкладки "Задания на подготовку"
         elif current_tab == self.desktop_tab.frame:
             self.desktop_tab.load_tasks()  # Загружаем данные для вкладки "Рабочий стол"
+        elif current_tab == self.shift_tasks_tab.frame:
+            self.shift_tasks_tab.load_production_tasks()  # Загружаем данные для вкладки "Задания на смену"
+        elif current_tab == self.shift_tasks_tab.frame:
+            self.shift_tasks_tab.load_shift_tasks()  # Загружаем данные для вкладки "Задания на смену"

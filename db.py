@@ -106,7 +106,7 @@ def create_tables():
         )
     """)
 
-    # Новая таблица "Задания на подготовку/оснастку"
+    # Таблица "Задания на подготовку/оснастку"
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS preparation_tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,6 +118,19 @@ def create_tables():
             status TEXT NOT NULL DEFAULT 'Создано',
             FOREIGN KEY (production_task_id) REFERENCES production_tasks(id),
             FOREIGN KEY (section_id) REFERENCES sections(id)
+        )
+    """)
+
+    # Таблица "Задания на смену"
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS shift_tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            creation_date TEXT NOT NULL,
+            production_task_id INTEGER NOT NULL,
+            shift_date TEXT NOT NULL,
+            section_name TEXT NOT NULL,
+            additional_info TEXT,
+            FOREIGN KEY (production_task_id) REFERENCES production_tasks(id)
         )
     """)
 
