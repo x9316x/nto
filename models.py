@@ -119,6 +119,29 @@ def insert_initial_data():
         WHERE id IN (1, 2, 3)
     """)
 
+
+    # Добавляем задания на смену
+    shift_tasks = [
+        ("2024-12-12", 1, "2025-01-01", "Лесопильная линия №1", "Не загружать лесопильную линию выше 70-ти %."),
+        ("2024-12-12", 2, "2025-01-01", "Дробилка", "После работы провести обслуживание дробилки."),
+        ("2024-12-12", 3, "2025-01-02", "Сушильная камера №1", "Сушить на высоких температурах запрещено!"),
+    ]
+    cursor.executemany("""
+        INSERT INTO shift_tasks (creation_date, production_task_id, shift_date, section_name, additional_info)
+        VALUES (?, ?, ?, ?, ?)
+    """, shift_tasks)
+
+    # Добавляем занятость участков
+    section_availability = [
+        (1, "2025-01-01"),
+        (2, "2025-01-01"),
+        (3, "2025-01-02"),
+    ]
+    cursor.executemany("""
+        INSERT INTO section_availability (section_id, date)
+        VALUES (?, ?)
+    """, section_availability)
+    
     conn.commit()
     conn.close()
     print("Тестовые данные успешно добавлены!")
