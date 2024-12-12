@@ -66,6 +66,9 @@ class ScheduleRegistrationTab:
         form.title("Регистрация расписания бригады")
         form.geometry("500x600")
 
+        # Дата создания
+        creation_date = datetime.date.today().strftime("%Y-%m-%d")
+
         # Вид бригады
         Label(form, text="Вид бригады:").pack(pady=5)
         brigade_type_combobox = ttk.Combobox(form, state="readonly")
@@ -96,19 +99,22 @@ class ScheduleRegistrationTab:
         employees_listbox.pack(pady=5, fill="both", expand=True)
 
         # Мастер
-        Label(form, text="Мастер (выберите из списка):").pack(pady=5)
+        Label(form, text="Мастер (выберите из сотрудников):").pack(pady=5)
         master_combobox = ttk.Combobox(form, state="readonly")
         master_combobox.pack(pady=5, fill="x")
+
+        # Привязка обновления мастера при выборе сотрудников
+        employees_listbox.bind("<<ListboxSelect>>", lambda e: self.update_master_list(employees_listbox, master_combobox))
 
         # Кнопка для сохранения
         Button(form, text="Сохранить расписание", command=lambda: self.save_schedule(
             form, brigade_type_combobox, section_combobox, start_date_entry, work_mode_combobox,
-            employees_listbox, master_combobox
+            employees_listbox, master_combobox, creation_date
         )).pack(pady=10)
 
         # Загрузка данных для формы
         self.load_brigade_types(brigade_type_combobox)
-        self.load_employees(employees_listbox, master_combobox)
+        self.load_employees(employees_listbox)
 
     def load_brigade_types(self, combobox):
         """Загружает виды бригад в выпадающий список."""
@@ -146,15 +152,14 @@ class ScheduleRegistrationTab:
         finally:
             conn.close()
 
-    def load_employees(self, listbox, combobox):
-        """Загружает сотрудников в список и выпадающий список для мастера."""
+    def load_employees(self, listbox):
+        """Загружает сотрудников в список."""
         conn = connect_db()
         cursor = conn.cursor()
         try:
             cursor.execute("SELECT id, full_name FROM employees")
             employees = cursor.fetchall()
             listbox.delete(0, "end")
-            combobox["values"] = [f"{row[0]} - {row[1]}" for row in employees]
             for emp in employees:
                 listbox.insert("end", f"{emp[0]} - {emp[1]}")
         except Exception as e:
@@ -162,7 +167,14 @@ class ScheduleRegistrationTab:
         finally:
             conn.close()
 
-    def save_schedule(self, form, brigade_combobox, section_combobox, start_date_entry, work_mode_combobox, employees_listbox, master_combobox):
+    def update_master_list(self, employees_listbox, master_combobox):
+        """Обновляет список мастеров на основе выбранных сотрудников."""
+        selected_employees = [employees_listbox.get(i) for i in employees_listbox.curselection()]
+        master_combobox["values"] = selected_employees
+        if master_combobox.get() not in selected_employees and selected_employees:
+            master_combobox.set(selected_employees[0])  # Устанавливаем первого выбранного сотрудника как мастера по умолчанию
+
+    def save_schedule(self, form, brigade_combobox, section_combobox, start_date_entry, work_mode_combobox, employees_listbox, master_combobox, creation_date):
         """Сохраняет расписание в базу данных."""
         # Собираем данные
         brigade_type = brigade_combobox.get()
@@ -175,6 +187,17 @@ class ScheduleRegistrationTab:
         # Валидация
         if not brigade_type or not section or not start_date or not work_mode or not selected_employees or not master:
             messagebox.showerror("Ошибка", "Все поля обязательны для заполнения!")
+            return
+
+        # Проверка даты начала работы
+        try:
+            start_date_obj = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
+            creation_date_obj = datetime.datetime.strptime(creation_date, "%Y-%m-%d").date()
+            if start_date_obj < creation_date_obj:
+                messagebox.showerror("Ошибка", "Дата начала работы не может быть раньше даты создания!")
+                return
+        except ValueError:
+            messagebox.showerror("Ошибка", "Введите дату начала работы в формате YYYY-MM-DD!")
             return
 
         # Сохранение данных
